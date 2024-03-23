@@ -1,6 +1,6 @@
 import Incident from "../models/incident.model.js";
-//import {uploadImage, deleteImage} from '../utils/cloudinary.js'
-//import fs from 'fs-extra'
+import {uploadImage, deleteImage} from '../utils/cloudinary.js'
+import fs from 'fs-extra'
 
 export const getIncidents = async (req, res) => {
   try {
@@ -22,10 +22,23 @@ export const createIncident = async (req, res) => {
       EPPs,
       areaName,
     });
+
+    if (req.files?.image) {
+        const result = await uploadImage(req.files.image.tempFilePath)
+        newIncident.imageUrl = {
+          public_id: result.public_id,
+          secure_url: result.secure_url
+        }
+        await fs.unlink(req.files.image.tempFilePath)
+        console.log(newIncident)
+    }
     
     const savedIncident = await newIncident.save();
     return res.json(savedIncident);
   } catch (error) {
+    if (req.files?.image) {
+        await fs.unlink(req.files.image.tempFilePath)
+    }
     return res.status(500).json({ message: error.message });
   }
 };
@@ -50,6 +63,8 @@ export const deleteIncident = async (req, res) => {
     const deletedIncident = await Incident.findByIdAndDelete(id);
 
     if (!deletedIncident) return res.status(404).json({message: 'Incident does not exists'})
+
+    await deleteImage(deletedIncident.image.public_id)
     
     return res.json(deletedIncident);
   } catch (error) {

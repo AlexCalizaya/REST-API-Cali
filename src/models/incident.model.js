@@ -17,10 +17,10 @@ const incidentSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    // imageUrl: {
-    //   secure_url: String,
-    //   public_id: String
-    // }
+    imageUrl: {
+      secure_url: String,
+      public_id: String
+    }
   },
   // {
   //   timestamps: true,
