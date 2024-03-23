@@ -49,6 +49,7 @@ export const updateIncident = async (req, res) => {
     const updatedIncident = await Incident.findByIdAndUpdate(id, req.body, {
       new: true,
     });
+    
     if (!updatedIncident)
       return res.status(404).json({ message: "Incident Not Found" });
     return res.json(updatedIncident);
@@ -64,7 +65,10 @@ export const deleteIncident = async (req, res) => {
 
     if (!deletedIncident) return res.status(404).json({message: 'Incident does not exists'})
 
-    await deleteImage(deletedIncident.image.public_id)
+    if (deletedIncident.imageUrl?.public_id) {
+      await deleteImage(deletedIncident.imageUrl.public_id)
+      console.log("eliminaré la img")
+    }
     
     return res.json(deletedIncident);
   } catch (error) {
